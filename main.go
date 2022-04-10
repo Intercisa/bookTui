@@ -10,6 +10,7 @@ import (
     "strings"
     "github.com/jedib0t/go-pretty/v6/table"
     "os"
+	"golang.org/x/net/html"
 
 )
    // "github.com/jedib0t/go-pretty/v6/list"
@@ -23,6 +24,11 @@ type Response struct {
     Card_html string
     Featured_event string
 }
+
+const booked string = "BOOKED"
+const cBooked string = "Cancel booking"
+const notBooked string = "NOT_BOOKED"
+
 
 func main() {
     p := fmt.Println
@@ -66,6 +72,9 @@ func main() {
 	var responses []Response  
 	json.Unmarshal(body, &responses)
     printTable(responses)
+
+	bookedStatus := parseHTML(responses[0].Card_html)
+	p(bookedStatus)
 }
 
 func getCurrentDate() string {
@@ -77,14 +86,41 @@ func getCurrentDate() string {
 func printTable(responses []Response) {
     t := table.NewWriter()
     t.SetOutputMirror(os.Stdout)
-    t.AppendHeader(table.Row{"#", "Start", "End", "Id"})
+    t.AppendHeader(table.Row{"#", "Start", "End", "Trainer", "Id"})
 
     for i := 0; i < len(responses); i++ {
         t.AppendRows([]table.Row{
-            {i + 1, responses[i].Start, responses[i].End, responses[i].Id},
+            {i + 1, responses[i].Start, responses[i].End, " ", responses[i].Id},
         })
     }
     t.AppendSeparator()
     t.AppendFooter(table.Row{"", "1.0", "Version", ""})
     t.Render()
 }
+
+func parseHTML(text string) (data string) {
+	// var trimmedText []string
+    tkn := html.NewTokenizer(strings.NewReader(text))
+	previousStartTokenTest := tkn.Token()
+	loopDomTest:
+	for {
+		tt := tkn.Next()
+		switch {
+		case tt == html.ErrorToken:
+			break loopDomTest // End of the document,  done
+		case tt == html.StartTagToken:
+			previousStartTokenTest = tkn.Token()
+		case tt == html.TextToken:
+			if previousStartTokenTest.Data == "script" {
+				continue
+			}
+			TxtContent := strings.TrimSpace(html.UnescapeString(string(tkn.Text())))
+			if len(TxtContent) > 0 && TxtContent == cBooked {
+				// trimmedText = append(trimmedText, TxtContent)
+				return booked
+			}
+		}
+	}
+ 	return notBooked 
+}
+
