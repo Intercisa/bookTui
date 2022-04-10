@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
     "time"
-    "strconv"
     "strings"
     "github.com/jedib0t/go-pretty/v6/table"
     "os"
@@ -28,6 +27,8 @@ type Response struct {
 const booked string = "BOOKED"
 const cBooked string = "Cancel booking"
 const notBooked string = "NOT_BOOKED"
+const trainer string = "Bodnár László"
+const exerciseType string = "Cross"
 
 
 func main() {
@@ -72,34 +73,44 @@ func main() {
 	var responses []Response  
 	json.Unmarshal(body, &responses)
     printTable(responses)
-
-	bookedStatus := parseHTML(responses[0].Card_html)
-	p(bookedStatus)
+	formatDateTime(responses[0].Start)
 }
 
 func getCurrentDate() string {
-    year, month, day := time.Now().Date()
-    dateStrArr := []string{strconv.Itoa(year), strconv.Itoa(int(month)), strconv.Itoa(day)}
-    return strings.Join(dateStrArr, "-")
+	t := time.Now().Local()
+	return t.Format("2006-01-02")
+}
+
+func formatDateTime(dateTime string) string {
+	layout := "2006-01-02T15:04:05.000Z"
+	t, err := time.Parse(layout, dateTime)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return t.Format("2006-01-02 15:04")
 }
 
 func printTable(responses []Response) {
     t := table.NewWriter()
     t.SetOutputMirror(os.Stdout)
-    t.AppendHeader(table.Row{"#", "Start", "End", "Trainer", "Id"})
+    t.AppendHeader(table.Row{"#", "Start", "End", "Trainer", "Type", "Id", "Status"})
 
     for i := 0; i < len(responses); i++ {
         t.AppendRows([]table.Row{
-            {i + 1, responses[i].Start, responses[i].End, " ", responses[i].Id},
+            {i + 1,
+			formatDateTime(responses[i].Start),
+			formatDateTime(responses[i].End),
+			trainer,
+			exerciseType,
+			responses[i].Id, parseHTML(responses[i].Card_html)},
         })
     }
     t.AppendSeparator()
-    t.AppendFooter(table.Row{"", "1.0", "Version", ""})
+    t.AppendFooter(table.Row{"", "", "1.0", "Version"})
     t.Render()
 }
 
 func parseHTML(text string) (data string) {
-	// var trimmedText []string
     tkn := html.NewTokenizer(strings.NewReader(text))
 	previousStartTokenTest := tkn.Token()
 	loopDomTest:
@@ -116,7 +127,6 @@ func parseHTML(text string) (data string) {
 			}
 			TxtContent := strings.TrimSpace(html.UnescapeString(string(tkn.Text())))
 			if len(TxtContent) > 0 && TxtContent == cBooked {
-				// trimmedText = append(trimmedText, TxtContent)
 				return booked
 			}
 		}
