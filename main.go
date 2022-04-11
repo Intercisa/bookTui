@@ -29,51 +29,24 @@ const cBooked string = "Cancel booking"
 const notBooked string = "NOT_BOOKED"
 const trainer string = "Bodnár László"
 const exerciseType string = "Cross"
+var notBookedList []Response
 
 
 func main() {
-    p := fmt.Println
-
-	url := "https://www.motibro.com/musers/explore_get_events?date="+getCurrentDate()+"&member_id=122212&length_days=35&ts=1649588036192&event_ids=1735380&trainer_ids=414&location_ids=&premise_ids="
-	method := "GET"
-
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
-	if err != nil {
-		p(err)
-		return
+	pf := fmt.Printf
+	var input string
+	printInitMessage()
+	for input != "q" {
+		fmt.Scanln(&input)
+		switch input {
+		case "t":
+			responses := getClasses()
+    		printTable(responses)
+			if len(notBookedList) != 0 {
+				pf("There is %d not booked events!", len(notBookedList))
+			}	
+		}
 	}
-	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0")
-	req.Header.Add("Accept", "application/json, text/javascript, */*; q=0.01")
-	req.Header.Add("Accept-Language", "en-US,en;q=0.5")
-	req.Header.Add("Referer", "https://www.motibro.com/musers/explore")
-	req.Header.Add("X-CSRF-Token", "avB6blLSzs34onRGmC6hSy5WBLoEOv/Ggd9TMmCTHTv+PJuCr8AsS2zA60Le9zXdep6AsyxX6NAoYSAooEcd7A==")
-	req.Header.Add("X-Requested-With", "XMLHttpRequest")
-	req.Header.Add("Connection", "keep-alive")
-	req.Header.Add("Cookie", "_motibro_session5=WyPwampMXo96sHPkqLNY7yHLOEI%2FOXXRfwXAl0XjtCHP07Ix5lTOMF%2BvLEnLNgmAqtoGXHL4XI8D3FoYFnbjW5L7iki4ZfnPUtog7R6e6TJxvdGvA9zZikThrByOdcrn5JAAgvsFve3JzL4zan9fXSFS20F4JRcsv4u51bDpeKku%2F4sMivciLZ4wuLK6qlILYfIz0aimChWqKmNsNrAjlrTvDSdQ0j%2FIr9m4GI7q99WGPiBJ36IzQi%2FLot0IZ9UXlbZFh%2BXdWeLcTzQ9EHTML1j%2Fthoj%2B5CXR2ie0AxOiL8NFVQICYQGOhmTMiQ%3D--K08Qxcc%2Bl2uDPKmo--Q7mH6uRcc%2F08wqtGpD0TFQ%3D%3D")
-	req.Header.Add("Sec-Fetch-Dest", "empty")
-	req.Header.Add("Sec-Fetch-Mode", "cors")
-	req.Header.Add("Sec-Fetch-Site", "same-origin")
-	req.Header.Add("Sec-GPC", "1")
-	req.Header.Add("DNT", "1")
-
-	res, err := client.Do(req)
-	if err != nil {
-		p(err)
-		return
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		p(err)
-		return
-	}
-	var responses []Response  
-	json.Unmarshal(body, &responses)
-    printTable(responses)
-	formatDateTime(responses[0].Start)
 }
 
 func getCurrentDate() string {
@@ -102,7 +75,8 @@ func printTable(responses []Response) {
 			formatDateTime(responses[i].End),
 			trainer,
 			exerciseType,
-			responses[i].Id, parseHTML(responses[i].Card_html)},
+			responses[i].Id,
+			bookHTMLParser(responses[i].Card_html, &responses[i])},
         })
     }
     t.AppendSeparator()
@@ -110,7 +84,7 @@ func printTable(responses []Response) {
     t.Render()
 }
 
-func parseHTML(text string) (data string) {
+func bookHTMLParser(text string, response *Response) (data string) {
     tkn := html.NewTokenizer(strings.NewReader(text))
 	previousStartTokenTest := tkn.Token()
 	loopDomTest:
@@ -131,6 +105,57 @@ func parseHTML(text string) (data string) {
 			}
 		}
 	}
+	notBookedList = append(notBookedList, *response)
  	return notBooked 
 }
 
+func getClasses() []Response {
+	p := fmt.Println
+
+	url := "https://www.motibro.com/musers/explore_get_events?date="+getCurrentDate()+"&member_id=122212&length_days=35&ts=1649588036192&event_ids=1735380&trainer_ids=414&location_ids=&premise_ids="
+	method := "GET"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		p(err)
+	}
+
+	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0")
+	req.Header.Add("Accept", "application/json, text/javascript, */*; q=0.01")
+	req.Header.Add("Accept-Language", "en-US,en;q=0.5")
+	req.Header.Add("Referer", "https://www.motibro.com/musers/explore")
+	req.Header.Add("X-CSRF-Token", "avB6blLSzs34onRGmC6hSy5WBLoEOv/Ggd9TMmCTHTv+PJuCr8AsS2zA60Le9zXdep6AsyxX6NAoYSAooEcd7A==")
+	req.Header.Add("X-Requested-With", "XMLHttpRequest")
+	req.Header.Add("Connection", "keep-alive")
+	req.Header.Add("Cookie", "_motibro_session5=WyPwampMXo96sHPkqLNY7yHLOEI%2FOXXRfwXAl0XjtCHP07Ix5lTOMF%2BvLEnLNgmAqtoGXHL4XI8D3FoYFnbjW5L7iki4ZfnPUtog7R6e6TJxvdGvA9zZikThrByOdcrn5JAAgvsFve3JzL4zan9fXSFS20F4JRcsv4u51bDpeKku%2F4sMivciLZ4wuLK6qlILYfIz0aimChWqKmNsNrAjlrTvDSdQ0j%2FIr9m4GI7q99WGPiBJ36IzQi%2FLot0IZ9UXlbZFh%2BXdWeLcTzQ9EHTML1j%2Fthoj%2B5CXR2ie0AxOiL8NFVQICYQGOhmTMiQ%3D--K08Qxcc%2Bl2uDPKmo--Q7mH6uRcc%2F08wqtGpD0TFQ%3D%3D")
+	req.Header.Add("Sec-Fetch-Dest", "empty")
+	req.Header.Add("Sec-Fetch-Mode", "cors")
+	req.Header.Add("Sec-Fetch-Site", "same-origin")
+	req.Header.Add("Sec-GPC", "1")
+	req.Header.Add("DNT", "1")
+
+	res, err := client.Do(req)
+	if err != nil {
+		p(err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		p(err)
+	}
+
+	var responses []Response  
+	json.Unmarshal(body, &responses)
+	return responses
+}
+
+func printInitMessage() {
+	p := fmt.Println
+
+	p("Please input:")
+	p("q for: quit")
+	p("t for: table")
+}
