@@ -11,6 +11,9 @@ import (
     "os"
 	"golang.org/x/net/html"
 	"bytes"
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
+	"strconv"
 
 )
    // "github.com/jedib0t/go-pretty/v6/list"
@@ -63,22 +66,26 @@ var notBookedCount int = 0
 
 func main() {
 	responses := getClasses()
-	var input string
-	printInitMessage()
-	for input != "q" {
-		fmt.Scanln(&input)
-		switch input {
-		case "t":
-    		printTable(responses)
-			printIfNotBooked(responses)
-		case "y":
-			if notBookedCount > 0 {
-				book(responses)
-				responses = getClasses()
-    			printTable(responses)
-			}
-		}
-	}
+
+selectableTableTest(responses)
+
+
+//	var input string
+//	printInitMessage()
+//	for input != "q" {
+//		fmt.Scanln(&input)
+//		switch input {
+//		case "t":
+//  		printTable(responses)
+//			printIfNotBooked(responses)
+//		case "y":
+//			if notBookedCount > 0 {
+//				book(responses)
+//				responses = getClasses()
+//  			printTable(responses)
+//			}
+//		}
+//	}
 }
 
 func getCurrentDate() string {
@@ -267,4 +274,89 @@ func printIfNotBooked (responses []Response) {
 		printNotBookedTable(responses)
 		p("y for: yes\nno for: no")
 	}	
+}
+
+func selectableTableTest(responses []Response) {
+	app := tview.NewApplication()
+	table := tview.NewTable().
+		SetBorders(true)
+
+	columns :=	strings.Split("# Start End Trainer Type Id Status", " ")
+
+	cols, rows := len(columns), len(responses)
+	for c := 0; c < cols; c++ {
+				color := tcell.ColorYellow
+				table.SetCell(
+					0, c,
+				tview.NewTableCell(columns[c]).
+					SetTextColor(color).
+					SetAlign(tview.AlignCenter))
+		}
+	
+	for r := 1; r <= rows; r++ {	
+		color := tcell.ColorWhite
+			table.SetCell(
+				r, 0,
+			tview.NewTableCell(strconv.Itoa(r)).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter))
+			
+			table.SetCell(
+				r, 1,
+			tview.NewTableCell(formatDateTime(responses[r-1].Start)).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter))
+				
+			table.SetCell(
+				r, 2,
+			tview.NewTableCell(formatDateTime(responses[r-1].End)).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter))
+				
+			table.SetCell(
+				r, 3,
+			tview.NewTableCell(trainer).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter))		
+
+			table.SetCell(
+				r, 4,
+			tview.NewTableCell(exerciseType).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter))	
+
+			table.SetCell(
+				r, 5,
+			tview.NewTableCell(responses[r-1].Id).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter))
+			
+			if bookHTMLParser(responses[r-1].Card_html, &responses[r-1]) != booked {
+				color = tcell.ColorRed
+			}	
+			table.SetCell(
+				r, 6,
+			tview.NewTableCell(bookHTMLParser(responses[r-1].Card_html, &responses[r-1])).
+				SetTextColor(color).
+				SetAlign(tview.AlignCenter))	
+		
+	}	
+
+	table.Select(0, 0).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEscape {
+			app.Stop()
+		}
+		if key == tcell.KeyEnter {
+			table.SetSelectable(true, false)
+		}
+	}).SetSelectedFunc(func(row int, column int) {
+		table.GetCell(row, 7).SetTextColor(tcell.ColorRed)
+		for i := 0; i < cols; i++ {
+			table.GetCell(row, i).SetTextColor(tcell.ColorGreen)	
+		}
+		table.SetSelectable(true, false)
+	})
+	if err := app.SetRoot(table, true).SetFocus(table).Run(); err != nil {
+		panic(err)
+	}
 }
