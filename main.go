@@ -7,8 +7,6 @@ import (
 	"net/http"
     "time"
     "strings"
-    "github.com/jedib0t/go-pretty/v6/table"
-    "os"
 	"golang.org/x/net/html"
 	"bytes"
 	"github.com/gdamore/tcell/v2"
@@ -26,7 +24,7 @@ type Response struct {
     Id string
     Card_html string
     Featured_event string
-	booked string
+	Booked string
 }
 
 type HeaderPair struct {
@@ -61,31 +59,12 @@ const notBooked string = "NOT_BOOKED"
 const trainer string = "Bodnár László"
 const exerciseType string = "Cross"
 
-var notBookedCount int = 0
-
 
 func main() {
 	responses := getClasses()
 
-selectableTableTest(responses)
 
-
-//	var input string
-//	printInitMessage()
-//	for input != "q" {
-//		fmt.Scanln(&input)
-//		switch input {
-//		case "t":
-//  		printTable(responses)
-//			printIfNotBooked(responses)
-//		case "y":
-//			if notBookedCount > 0 {
-//				book(responses)
-//				responses = getClasses()
-//  			printTable(responses)
-//			}
-//		}
-//	}
+	 runBookingTable(responses)
 }
 
 func getCurrentDate() string {
@@ -100,51 +79,6 @@ func formatDateTime(dateTime string) string {
 		fmt.Println(err)
 	}
 	return t.Format("2006-01-02 15:04")
-}
-
-func printTable(responses []Response) {
-    t := table.NewWriter()
-    t.SetOutputMirror(os.Stdout)
-    t.AppendHeader(table.Row{"#", "Start", "End", "Trainer", "Type", "Id", "Status"})
-
-    for i := 0; i < len(responses); i++ {
-        t.AppendRows([]table.Row{
-            {i + 1,
-			formatDateTime(responses[i].Start),
-			formatDateTime(responses[i].End),
-			trainer,
-			exerciseType,
-			responses[i].Id,
-			bookHTMLParser(responses[i].Card_html, &responses[i])},
-        })
-    }
-    t.AppendSeparator()
-    t.AppendFooter(table.Row{"", "", "1.0", "Version"})
-    t.Render()
-}
-
-func printNotBookedTable(responses []Response) {
-	t := table.NewWriter()
-    t.SetOutputMirror(os.Stdout)
-    t.AppendHeader(table.Row{"#", "Start", "End", "Trainer", "Type", "Id", "Status"})
-	count := 0
-    for i := 0; i < len(responses); i++ {
-		if responses[i].booked == notBooked {		
-			count++
-			t.AppendRows([]table.Row{
-				{count,
-				formatDateTime(responses[i].Start),
-				formatDateTime(responses[i].End),
-				trainer,
-				exerciseType,
-				responses[i].Id,
-				bookHTMLParser(responses[i].Card_html, &responses[i])},
-			})
-   	 }
-	}
-    t.AppendSeparator()
-    t.AppendFooter(table.Row{"", "", "1.0", "Version"})
-    t.Render()
 }
 
 func bookHTMLParser(text string, response *Response) (data string) {
@@ -164,13 +98,12 @@ func bookHTMLParser(text string, response *Response) (data string) {
 			}
 			TxtContent := strings.TrimSpace(html.UnescapeString(string(tkn.Text())))
 			if len(TxtContent) > 0 && (TxtContent == cBooked || TxtContent == closed) {
-				response.booked = Booked
+				response.Booked = Booked
 				return booked
 			}
 		}
 	}
-	response.booked = NotBooked
-	notBookedCount++
+	response.Booked = NotBooked
  	return notBooked 
 }
 
@@ -213,6 +146,11 @@ func getClasses() []Response {
 
 	var responses []Response  
 	json.Unmarshal(body, &responses)
+
+	for i, r := range responses {
+		bookHTMLParser(r.Card_html, &responses[i])
+	}
+
 	return responses
 }
 
@@ -220,7 +158,7 @@ func book(responses []Response) {
 	p := fmt.Println
 
 	for i := 0; i < len(responses); i++ {
-		if responses[i].booked == notBooked {
+		if responses[i].Booked == notBooked {
 			url := "https://www.motibro.com/musers/booking_do"
 			body := "event_id="+responses[i].Id+"&function=booking&page="
 
@@ -251,32 +189,89 @@ func book(responses []Response) {
 			if err != nil {
 				p(err)
 			}
+
 			defer res.Body.Close()
 
 			}
 		}
 }
 
-func printInitMessage() {
-	p := fmt.Println
 
-	p("Please input:")
-	p("q for: quit")
-	p("t for: table")
+func bookById(id string) {
+	p := fmt.Println
+			url := "https://www.motibro.com/musers/booking_do"
+			body := "event_id="+id+"&function=booking&page="
+
+			client := &http.Client{}
+			req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
+
+			if err != nil {
+				p(err)
+			}
+
+			req.Header.Add(userAgent.first, userAgent.second)
+			req.Header.Add(accept.first, accept.second)
+			req.Header.Add(acceptLanguage.first, acceptLanguage.second)
+			req.Header.Add(referer.first, referer.second)
+			req.Header.Add(xCSRFToken.first, xCSRFToken.second)
+			req.Header.Add(xRequestedWith.first, xRequestedWith.second)
+			req.Header.Add(contentType.first, contentType.second)
+			req.Header.Add(origin.first, origin.second)
+			req.Header.Add(connection.first, connection.second)
+			req.Header.Add(cookie.first, cookie.second)
+			req.Header.Add(secFetchDest.first, secFetchDest.second)
+			req.Header.Add(secFetchMode.first, secFetchMode.second)
+			req.Header.Add(secFetchSite.first, secFetchSite.second)
+			req.Header.Add(secGPC.first, secGPC.second)
+			req.Header.Add(DNT.first, DNT.second)
+
+			res, err := client.Do(req)
+			if err != nil {
+				p(err)
+			}
+
+			defer res.Body.Close()
 }
 
-func printIfNotBooked (responses []Response) {
-	pf := fmt.Printf
+
+
+func cancel(id string) {
 	p := fmt.Println
-	if notBookedCount != 0 {
-		pf("\nThere is %d not booked events!\n", notBookedCount)
-		p("\nDo you wanna book this events?\n")
-		printNotBookedTable(responses)
-		p("y for: yes\nno for: no")
-	}	
+			url := "https://www.motibro.com/musers/booking_do"
+			body := "event_id="+id+"&function=booking&page="
+
+			client := &http.Client{}
+			req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
+
+			if err != nil {
+				p(err)
+			}
+
+			req.Header.Add(userAgent.first, userAgent.second)
+			req.Header.Add(accept.first, accept.second)
+			req.Header.Add(acceptLanguage.first, acceptLanguage.second)
+			req.Header.Add(referer.first, referer.second)
+			req.Header.Add(xCSRFToken.first, xCSRFToken.second)
+			req.Header.Add(xRequestedWith.first, xRequestedWith.second)
+			req.Header.Add(contentType.first, contentType.second)
+			req.Header.Add(origin.first, origin.second)
+			req.Header.Add(connection.first, connection.second)
+			req.Header.Add(cookie.first, cookie.second)
+			req.Header.Add(secFetchDest.first, secFetchDest.second)
+			req.Header.Add(secFetchMode.first, secFetchMode.second)
+			req.Header.Add(secFetchSite.first, secFetchSite.second)
+			req.Header.Add(secGPC.first, secGPC.second)
+			req.Header.Add(DNT.first, DNT.second)
+
+			res, err := client.Do(req)
+			if err != nil {
+				p(err)
+			}
+
+			defer res.Body.Close()
 }
 
-func selectableTableTest(responses []Response) {
+func runBookingTable(responses []Response) {
 	app := tview.NewApplication()
 	table := tview.NewTable().
 		SetBorders(true)
@@ -331,15 +326,14 @@ func selectableTableTest(responses []Response) {
 				SetTextColor(color).
 				SetAlign(tview.AlignCenter))
 			
-			if bookHTMLParser(responses[r-1].Card_html, &responses[r-1]) != booked {
+			if (responses[r-1].Booked != booked) {
 				color = tcell.ColorRed
 			}	
 			table.SetCell(
 				r, 6,
-			tview.NewTableCell(bookHTMLParser(responses[r-1].Card_html, &responses[r-1])).
+			tview.NewTableCell(responses[r-1].Booked).
 				SetTextColor(color).
-				SetAlign(tview.AlignCenter))	
-		
+				SetAlign(tview.AlignCenter))
 	}	
 
 	table.Select(0, 0).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
@@ -349,19 +343,31 @@ func selectableTableTest(responses []Response) {
 		if key == tcell.KeyEnter {
 			table.SetSelectable(true, false)
 		}
-	}).SetSelectedFunc(func(row int, column int) {
-		table.GetCell(row, column).SetTextColor(tcell.ColorRed)
-		for i := 0; i < cols; i++ {
-			fmt.Println(responses[row-1].Id)
-			if(table.GetCell(row, i).Text == notBooked) {
-				fmt.Println(responses[row-1].Id)
-				newCell := 	tview.NewTableCell(booked).
-				SetAlign(tview.AlignCenter)
-				table.SetCell(row, i, newCell)
-			}
+	}).SetSelectedFunc(func(row int, column int) {		
+		newCellBooked := 	tview.NewTableCell(booked).
+		SetAlign(tview.AlignCenter)
 
-			table.GetCell(row, i).SetTextColor(tcell.ColorGreen)	
+		newCellNotBooked := 	tview.NewTableCell(booked).
+		SetAlign(tview.AlignCenter)
+
+		if(table.GetCell(row, cols-1).Text == notBooked) {
+			bookById(responses[row].Id)
+			table.SetCell(row, cols-1, newCellBooked)
+
+			for i := 0; i < cols; i++ {
+				table.GetCell(row, i).SetTextColor(tcell.ColorGreen)	
+			}
 		}
+
+		if(table.GetCell(row, cols-1).Text == booked) {
+			cancel(responses[row].Id)
+			table.SetCell(row, cols-1, newCellNotBooked)
+
+			for i := 0; i < cols; i++ {
+				table.GetCell(row, i).SetTextColor(tcell.ColorRed)	
+			}
+		}
+
 		
 		table.SetSelectable(true, false)
 	})
