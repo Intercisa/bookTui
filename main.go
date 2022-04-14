@@ -343,7 +343,7 @@ func runBookingTable(responses []Response) {
 		if key == tcell.KeyEnter {
 			table.SetSelectable(true, false)
 		}
-	}).SetSelectedFunc(func(row int, column int) {		
+	}).SetSelectedFunc(func(row int, column int) {	
 		newCellBooked := 	tview.NewTableCell(booked).
 		SetAlign(tview.AlignCenter)
 
@@ -367,7 +367,6 @@ func runBookingTable(responses []Response) {
 				table.GetCell(row, i).SetTextColor(tcell.ColorRed)	
 			}
 		}
-
 		
 		table.SetSelectable(true, false)
 	})
