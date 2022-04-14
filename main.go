@@ -350,10 +350,19 @@ func selectableTableTest(responses []Response) {
 			table.SetSelectable(true, false)
 		}
 	}).SetSelectedFunc(func(row int, column int) {
-		table.GetCell(row, 7).SetTextColor(tcell.ColorRed)
+		table.GetCell(row, column).SetTextColor(tcell.ColorRed)
 		for i := 0; i < cols; i++ {
+			fmt.Println(responses[row-1].Id)
+			if(table.GetCell(row, i).Text == notBooked) {
+				fmt.Println(responses[row-1].Id)
+				newCell := 	tview.NewTableCell(booked).
+				SetAlign(tview.AlignCenter)
+				table.SetCell(row, i, newCell)
+			}
+
 			table.GetCell(row, i).SetTextColor(tcell.ColorGreen)	
 		}
+		
 		table.SetSelectable(true, false)
 	})
 	if err := app.SetRoot(table, true).SetFocus(table).Run(); err != nil {
