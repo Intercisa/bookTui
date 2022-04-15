@@ -39,10 +39,8 @@ var userAgent = HeaderPair{"User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64
 var accept = HeaderPair{"Accept", "application/json, text/javascript, */*; q=0.01"}
 var acceptLanguage = HeaderPair{"Accept-Language", "en-US,en;q=0.5"}
 var referer = HeaderPair{"Referer", "https://www.motibro.com/musers/explore"}
-var xCSRFToken = HeaderPair{"X-CSRF-Token", "avB6blLSzs34onRGmC6hSy5WBLoEOv/Ggd9TMmCTHTv+PJuCr8AsS2zA60Le9zXdep6AsyxX6NAoYSAooEcd7A=="}
 var xRequestedWith = HeaderPair{"X-Requested-With", "XMLHttpRequest"}
 var connection = HeaderPair{"Connection", "keep-alive"}
-var cookie = HeaderPair{"Cookie", "_motibro_session5=WyPwampMXo96sHPkqLNY7yHLOEI%2FOXXRfwXAl0XjtCHP07Ix5lTOMF%2BvLEnLNgmAqtoGXHL4XI8D3FoYFnbjW5L7iki4ZfnPUtog7R6e6TJxvdGvA9zZikThrByOdcrn5JAAgvsFve3JzL4zan9fXSFS20F4JRcsv4u51bDpeKku%2F4sMivciLZ4wuLK6qlILYfIz0aimChWqKmNsNrAjlrTvDSdQ0j%2FIr9m4GI7q99WGPiBJ36IzQi%2FLot0IZ9UXlbZFh%2BXdWeLcTzQ9EHTML1j%2Fthoj%2B5CXR2ie0AxOiL8NFVQICYQGOhmTMiQ%3D--K08Qxcc%2Bl2uDPKmo--Q7mH6uRcc%2F08wqtGpD0TFQ%3D%3D"}
 var secFetchDest = HeaderPair{"Sec-Fetch-Dest", "empty"}
 var secFetchMode = HeaderPair{"Sec-Fetch-Mode", "cors"}
 var secFetchSite = HeaderPair{"Sec-Fetch-Site", "same-origin"}
@@ -115,8 +113,7 @@ loopDomTest:
 func getClasses() []Response {
 	p := log.Println
 
-	url := "https://www.motibro.com/musers/explore_get_events?date=" + getCurrentDate() + "&member_id=122212&length_days=35&ts=1649588036192&event_ids=1735380&trainer_ids=414&location_ids=&premise_ids="
-
+	url := ""
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 
