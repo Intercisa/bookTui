@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"log"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -70,7 +70,6 @@ func main() {
 	app := tview.NewApplication()
 	runBookingTable(app)
 }
-
 
 func getCurrentDate() string {
 	t := time.Now().Local()
@@ -163,86 +162,85 @@ func bookAll() {
 	p := log.Println
 
 	for i := 0; i < len(responses); i++ {
-			url := "https://www.motibro.com/musers/booking_do"
-			body := "event_id=" + responses[i].Id + "&function=booking&page="
-			client := &http.Client{}
-			req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
+		url := "https://www.motibro.com/musers/booking_do"
+		body := "event_id=" + responses[i].Id + "&function=booking&page="
+		client := &http.Client{}
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
 
-			if err != nil {
-				p(err)
-			}
+		if err != nil {
+			p(err)
+		}
 
-			req.Header.Add(userAgent.first, userAgent.second)
-			req.Header.Add(accept.first, accept.second)
-			req.Header.Add(acceptLanguage.first, acceptLanguage.second)
-			req.Header.Add(referer.first, referer.second)
-			req.Header.Add(xCSRFToken.first, xCSRFToken.second)
-			req.Header.Add(xRequestedWith.first, xRequestedWith.second)
-			req.Header.Add(contentType.first, contentType.second)
-			req.Header.Add(origin.first, origin.second)
-			req.Header.Add(connection.first, connection.second)
-			req.Header.Add(cookie.first, cookie.second)
-			req.Header.Add(secFetchDest.first, secFetchDest.second)
-			req.Header.Add(secFetchMode.first, secFetchMode.second)
-			req.Header.Add(secFetchSite.first, secFetchSite.second)
-			req.Header.Add(secGPC.first, secGPC.second)
-			req.Header.Add(DNT.first, DNT.second)
+		req.Header.Add(userAgent.first, userAgent.second)
+		req.Header.Add(accept.first, accept.second)
+		req.Header.Add(acceptLanguage.first, acceptLanguage.second)
+		req.Header.Add(referer.first, referer.second)
+		req.Header.Add(xCSRFToken.first, xCSRFToken.second)
+		req.Header.Add(xRequestedWith.first, xRequestedWith.second)
+		req.Header.Add(contentType.first, contentType.second)
+		req.Header.Add(origin.first, origin.second)
+		req.Header.Add(connection.first, connection.second)
+		req.Header.Add(cookie.first, cookie.second)
+		req.Header.Add(secFetchDest.first, secFetchDest.second)
+		req.Header.Add(secFetchMode.first, secFetchMode.second)
+		req.Header.Add(secFetchSite.first, secFetchSite.second)
+		req.Header.Add(secGPC.first, secGPC.second)
+		req.Header.Add(DNT.first, DNT.second)
 
-			res, err := client.Do(req)
-			if err != nil {
-				p(err)
-			}
+		res, err := client.Do(req)
+		if err != nil {
+			p(err)
+		}
 
-			defer res.Body.Close()
+		defer res.Body.Close()
 	}
 }
-
 
 func cancelAll() {
 	p := log.Println
 
 	for i := 0; i < len(responses); i++ {
-			url := "https://www.motibro.com/musers/booking_do"
-			body := "event_id=" + responses[i].Id + "&function=cancel_booking&page="
-			client := &http.Client{}
-			req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
+		url := "https://www.motibro.com/musers/booking_do"
+		body := "event_id=" + responses[i].Id + "&function=cancel_booking&page="
+		client := &http.Client{}
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
 
-			if err != nil {
-				p(err)
-			}
+		if err != nil {
+			p(err)
+		}
 
-			req.Header.Add(userAgent.first, userAgent.second)
-			req.Header.Add(accept.first, accept.second)
-			req.Header.Add(acceptLanguage.first, acceptLanguage.second)
-			req.Header.Add(referer.first, referer.second)
-			req.Header.Add(xCSRFToken.first, xCSRFToken.second)
-			req.Header.Add(xRequestedWith.first, xRequestedWith.second)
-			req.Header.Add(contentType.first, contentType.second)
-			req.Header.Add(origin.first, origin.second)
-			req.Header.Add(connection.first, connection.second)
-			req.Header.Add(cookie.first, cookie.second)
-			req.Header.Add(secFetchDest.first, secFetchDest.second)
-			req.Header.Add(secFetchMode.first, secFetchMode.second)
-			req.Header.Add(secFetchSite.first, secFetchSite.second)
-			req.Header.Add(secGPC.first, secGPC.second)
-			req.Header.Add(DNT.first, DNT.second)
+		req.Header.Add(userAgent.first, userAgent.second)
+		req.Header.Add(accept.first, accept.second)
+		req.Header.Add(acceptLanguage.first, acceptLanguage.second)
+		req.Header.Add(referer.first, referer.second)
+		req.Header.Add(xCSRFToken.first, xCSRFToken.second)
+		req.Header.Add(xRequestedWith.first, xRequestedWith.second)
+		req.Header.Add(contentType.first, contentType.second)
+		req.Header.Add(origin.first, origin.second)
+		req.Header.Add(connection.first, connection.second)
+		req.Header.Add(cookie.first, cookie.second)
+		req.Header.Add(secFetchDest.first, secFetchDest.second)
+		req.Header.Add(secFetchMode.first, secFetchMode.second)
+		req.Header.Add(secFetchSite.first, secFetchSite.second)
+		req.Header.Add(secGPC.first, secGPC.second)
+		req.Header.Add(DNT.first, DNT.second)
 
-			res, err := client.Do(req)
-			if err != nil {
-				p(err)
-			}
+		res, err := client.Do(req)
+		if err != nil {
+			p(err)
+		}
 
-			defer res.Body.Close()
+		defer res.Body.Close()
 	}
 }
 
 func bookById(id string) {
 	p := log.Println
 	url := "https://www.motibro.com/musers/booking_do"
-	body := "event_id=" + id + "&function=booking&page="	
+	body := "event_id=" + id + "&function=booking&page="
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
-
+	log.Println("HERE")
 	if err != nil {
 		p(err)
 	}
@@ -269,15 +267,13 @@ func bookById(id string) {
 	}
 
 	defer res.Body.Close()
-
-	log.Println(res.Status, "res")
 }
 
 func cancel(id string) {
 	p := log.Println
 	url := "https://www.motibro.com/musers/booking_do"
 	body := "event_id=" + id + "&function=cancel_booking&page="
-
+	log.Println("HERE")
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
 
@@ -383,11 +379,10 @@ func setRows(table *tview.Table) {
 				SetTextColor(color).
 				SetAlign(tview.AlignCenter))
 	}
-
 }
 
 func runBookingTable(app *tview.Application) {
-	
+
 	table := tview.NewTable().
 		SetBorders(true)
 
@@ -400,58 +395,55 @@ func runBookingTable(app *tview.Application) {
 			app.Stop()
 		}
 		if key == tcell.KeyEnter {
-			table.SetSelectable(true, true)
+			table.SetSelectable(true, false)
 		}
 		if key == tcell.KeyTab {
-			row, _ := table.GetSelection()
-			table.Select(row, cols-1)
-			table.SetSelectable(true, true)
+
 		}
 	})
 
 	table.SetSelectedFunc(func(row int, column int) {
 		if table.GetCell(row, cols-1).Text == Book {
-			app.Suspend(func () {
-				showModal(Book,row-1)
+			app.Suspend(func() {
+				showModal(Book, row-1)
 			})
 			defer setRows(table)
 		}
 
 		if table.GetCell(row, cols-1).Text == Cancel {
-			app.Suspend(func () {
-				showModal(Cancel,row-1)
+			app.Suspend(func() {
+				showModal(Cancel, row-1)
 			})
 
 			defer setRows(table)
 		}
 
-		table.SetSelectable(true, true)
+		table.SetSelectable(true, false)
 	})
 	if err := app.SetRoot(table, true).SetFocus(table).Run(); err != nil {
 		panic(err)
 	}
 }
 
-func showModal(actionStr string, index int, ) {
+func showModal(actionStr string, index int) {
 	modalApp := tview.NewApplication()
 	modal := tview.NewModal().
-		SetText("Event start: " +formatDateTime(responses[index].Start)+" ends: "+formatDateTime(responses[index].End)+"\n"+
-			"Do you want to "+ actionStr +" this event?").
+		SetText("Event start: " + formatDateTime(responses[index].Start) + " ends: " + formatDateTime(responses[index].End) + "\n" +
+			"Do you want to " + actionStr + " this event?").
 		AddButtons([]string{actionStr, "Cancel"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			if actionStr == Cancel {
+
+			if buttonIndex == 0 && actionStr == Cancel {
 				cancel(responses[index].Id)
 				defer modalApp.Stop()
-			}
-
-			if actionStr == Book {
+			} else if buttonIndex == 0 && actionStr == Book {
 				bookById(responses[index].Id)
 				defer modalApp.Stop()
+			} else {
+				modalApp.Stop()
 			}
 		})
 	if err := modalApp.SetRoot(modal, true).SetFocus(modal).Run(); err != nil {
 		panic(err)
 	}
-	modalApp.Stop()
 }
-
