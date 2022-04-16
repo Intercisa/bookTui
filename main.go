@@ -240,7 +240,6 @@ func bookById(id string) {
 	body := "event_id=" + id + "&function=booking&page="
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
-	log.Println("HERE")
 	if err != nil {
 		p(err)
 	}
@@ -273,7 +272,6 @@ func cancel(id string) {
 	p := log.Println
 	url := "https://www.motibro.com/musers/booking_do"
 	body := "event_id=" + id + "&function=cancel_booking&page="
-	log.Println("HERE")
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBufferString(body))
 
