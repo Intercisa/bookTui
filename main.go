@@ -45,7 +45,7 @@ var connection = HeaderPair{"Connection", "keep-alive"}
 var cookie = HeaderPair{"Cookie", "_motibro_session5=WyPwampMXo96sHPkqLNY7yHLOEI%2FOXXRfwXAl0XjtCHP07Ix5lTOMF%2BvLEnLNgmAqtoGXHL4XI8D3FoYFnbjW5L7iki4ZfnPUtog7R6e6TJxvdGvA9zZikThrByOdcrn5JAAgvsFve3JzL4zan9fXSFS20F4JRcsv4u51bDpeKku%2F4sMivciLZ4wuLK6qlILYfIz0aimChWqKmNsNrAjlrTvDSdQ0j%2FIr9m4GI7q99WGPiBJ36IzQi%2FLot0IZ9UXlbZFh%2BXdWeLcTzQ9EHTML1j%2Fthoj%2B5CXR2ie0AxOiL8NFVQICYQGOhmTMiQ%3D--K08Qxcc%2Bl2uDPKmo--Q7mH6uRcc%2F08wqtGpD0TFQ%3D%3D"}
 var secFetchDest = HeaderPair{"Sec-Fetch-Dest", "empty"}
 var signInsecFetchDest = HeaderPair{"Sec-Fetch-Dest", "document"}
-var	signInsecFetchMode = HeaderPair{"Sec-Fetch-Mode", "navigate"}		
+var signInsecFetchMode = HeaderPair{"Sec-Fetch-Mode", "navigate"}
 var secFetchMode = HeaderPair{"Sec-Fetch-Mode", "cors"}
 var secFetchSite = HeaderPair{"Sec-Fetch-Site", "same-origin"}
 var secGPC = HeaderPair{"Sec-GPC", "1"}
@@ -56,7 +56,6 @@ var secFetchUser = HeaderPair{"Sec-Fetch-User", "?1"}
 var insecureRequest = HeaderPair{"Upgrade-Insecure-Requests", "1"}
 var cacheControl = HeaderPair{"Cache-Control", "max-age=0"}
 var ifNoneMatch = HeaderPair{"If-None-Match", "W/\"4a282e0f00ac036ccecdf6fc5ea727f7\""}
-
 
 const (
 	Booked    string = "BOOKED"
@@ -74,7 +73,7 @@ const trainer string = "Bodnár László"
 const exerciseType string = "Cross"
 
 func main() {
-	 setCredentials()
+	setCredentials()
 }
 
 func setCredentials() (string, string) {
@@ -86,32 +85,31 @@ func setCredentials() (string, string) {
 		AddButton("Quit", func() {
 			app.Stop()
 		})
-		app.EnableMouse(true)
-		form.AddButton("Login", func(){
-			emailInputField := form.GetFormItemByLabel("Email").(*tview.InputField)
-			passwordInputField := form.GetFormItemByLabel("Password").(*tview.InputField)
-			email = emailInputField.GetText()
-			password = passwordInputField.GetText()
-			
-			app.Suspend(func() {
-				if signIn(email, password) {
-					app := tview.NewApplication()
-					runBookingTable(app)
-					form.SetFieldBackgroundColor(tcell.ColorBlue)
-				}else {
-					form.SetFieldBackgroundColor(tcell.ColorRed)
-				}
-				emailInputField.SetText("")
-				passwordInputField.SetText("")
-			})
+	app.EnableMouse(true)
+	form.AddButton("Login", func() {
+		emailInputField := form.GetFormItemByLabel("Email").(*tview.InputField)
+		passwordInputField := form.GetFormItemByLabel("Password").(*tview.InputField)
+		email = emailInputField.GetText()
+		password = passwordInputField.GetText()
+
+		app.Suspend(func() {
+			if signIn(email, password) {
+				app := tview.NewApplication()
+				runBookingTable(app)
+				form.SetFieldBackgroundColor(tcell.ColorBlue)
+			} else {
+				form.SetFieldBackgroundColor(tcell.ColorRed)
+			}
+			emailInputField.SetText("")
+			passwordInputField.SetText("")
 		})
+	})
 	form.SetBorder(true).SetTitle("Please login - MotiBro").SetTitleAlign(tview.AlignLeft)
 	if err := app.SetRoot(form, true).SetFocus(form).Run(); err != nil {
 		panic(err)
 	}
 	return email, password
 }
-
 
 func getCurrentDate() string {
 	t := time.Now().Local()
@@ -156,13 +154,12 @@ loopDomTest:
 func signIn(email, password string) bool {
 	password = "X3zrnFzJJ92SBBm"
 	url := "https://www.motibro.com/users/login_main_login"
-	payload := strings.NewReader("authenticity_token=2z6j%2FhQ9xupm20PnyCBErgHvjxLLjtVij0BTsdCUcKlKuOELcqQLZ3Ieyhh5Abl80%2BmGdgc9HU4T6ddJH2jv4A%3D%3D&email="+email+"&password="+password+"&commit=Bel%C3%A9p%C3%A9s")
-	client := &http.Client {
-	}
+	payload := strings.NewReader("authenticity_token=2z6j%2FhQ9xupm20PnyCBErgHvjxLLjtVij0BTsdCUcKlKuOELcqQLZ3Ieyhh5Abl80%2BmGdgc9HU4T6ddJH2jv4A%3D%3D&email=" + email + "&password=" + password + "&commit=Bel%C3%A9p%C3%A9s")
+	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPost, url, payload)
-  
+
 	if err != nil {
-	  log.Println(err)
+		log.Println(err)
 	}
 	req.Header.Add(userAgent.key, userAgent.value)
 	req.Header.Add(accept.key, accept.value)
@@ -178,20 +175,19 @@ func signIn(email, password string) bool {
 	req.Header.Add(secFetchSite.key, secFetchSite.value)
 	req.Header.Add(secGPC.key, secGPC.value)
 	req.Header.Add(DNT.key, DNT.value)
-  
+
 	res, err := client.Do(req)
 	if err != nil {
-	  log.Println(err)
+		log.Println(err)
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-	  log.Println(err)
+		log.Println(err)
 	}
 
 	return strings.Contains(string(body), "/users/signing_in?email")
 }
-
 
 func getClasses() []Response {
 	p := log.Println
@@ -385,7 +381,7 @@ func cancel(id string) {
 }
 
 func setColumns(table *tview.Table) int {
-	columns := strings.Split("# Start End Trainer Type Id Status Func", " ")
+	columns := strings.Split("# Start End Trainer Type Id Status", " ")
 
 	cols := len(columns)
 	for c := 0; c < cols; c++ {
@@ -401,10 +397,10 @@ func setColumns(table *tview.Table) int {
 
 func setRows(table *tview.Table) {
 	responses = getClasses()
-
+	
 	for r := 1; r <= len(responses); r++ {
 		color := tcell.ColorWhite
-		btn := Cancel
+		backgroundColor := tcell.ColorBlack
 		table.SetCell(
 			r, 0,
 			tview.NewTableCell(strconv.Itoa(r)).
@@ -441,22 +437,20 @@ func setRows(table *tview.Table) {
 				SetTextColor(color).
 				SetAlign(tview.AlignCenter))
 
+		color = tcell.ColorWhite
 		if responses[r-1].Booked != Booked {
-			color = tcell.ColorRed
-			btn = Book
+			backgroundColor = tcell.ColorDarkRed
+		} else {
+			backgroundColor = tcell.ColorDarkGreen
 		}
 
 		table.SetCell(
 			r, 6,
 			tview.NewTableCell(responses[r-1].Booked).
 				SetTextColor(color).
+				SetBackgroundColor(backgroundColor).
 				SetAlign(tview.AlignCenter))
 
-		table.SetCell(
-			r, 7,
-			tview.NewTableCell(btn).
-				SetTextColor(color).
-				SetAlign(tview.AlignCenter))
 	}
 }
 
@@ -481,14 +475,14 @@ func runBookingTable(app *tview.Application) {
 	})
 
 	table.SetSelectedFunc(func(row int, column int) {
-		if table.GetCell(row, cols-1).Text == Book {
+		if table.GetCell(row, cols-1).Text == NotBooked {
 			app.Suspend(func() {
 				showModal(Book, row-1)
 			})
 			defer setRows(table)
 		}
 
-		if table.GetCell(row, cols-1).Text == Cancel {
+		if table.GetCell(row, cols-1).Text == Booked {
 			app.Suspend(func() {
 				showModal(Cancel, row-1)
 			})
