@@ -27,7 +27,7 @@ RUN cd bookTui
 
 RUN go get .
 
-RUN build
+RUN go build .
 
 RUN ln -s /bookTui/gtk-test  /usr/local/bin/book
 
