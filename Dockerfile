@@ -21,7 +21,7 @@ RUN go version
 
 RUN apk add git && apk add vim
 
-RUN git clone git@github.com:Intercisa/bookTui.git
+RUN git clone https://github.com:Intercisa/bookTui.git
 
 RUN cd bookTui
 
