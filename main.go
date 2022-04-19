@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
-	"os"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -91,7 +91,7 @@ func main() {
 
 func setCredentials() (string, string) {
 	logger()
-	
+
 	var email, password string
 	app := tview.NewApplication()
 	form := tview.NewForm().
@@ -107,7 +107,7 @@ func setCredentials() (string, string) {
 		email = emailInputField.GetText()
 		password = passwordInputField.GetText()
 
-		log.Println("_CRED_",email, password)
+		log.Println("_CRED_", email, password) // only for testing/debuging and developing DON'T EVER USE THIS IN PROD, PRIVACY IS KEY! 
 
 		app.Suspend(func() {
 			if signIn(email, password) {
@@ -206,10 +206,11 @@ func signIn(email, password string) bool {
 	if err != nil {
 		log.Println(err)
 	}
+
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 
-	log.Println("_RES_BODY_", body)
+	defer log.Println("_SIGN_IN_", string(body))
 
 	if err != nil {
 		log.Println(err)
@@ -255,7 +256,7 @@ func getClasses() []Response {
 		p(err)
 	}
 
-	log.Println("getClasses: ", res)
+	defer log.Println("_GET_CLASSES_", string(body))
 
 	var responses []Response
 	json.Unmarshal(body, &responses)
@@ -301,8 +302,11 @@ func bookAll() {
 			p(err)
 		}
 
-		log.Println("_RES_BODY_", res.Body)
 		defer res.Body.Close()
+
+		logBody, err := ioutil.ReadAll(res.Body)
+
+		defer log.Println("_BOOK_ALL_", string(logBody))
 	}
 }
 
@@ -340,8 +344,11 @@ func cancelAll() {
 			p(err)
 		}
 
-		log.Println("_RES_BODY_", res.Body)
 		defer res.Body.Close()
+
+		logBody, err := ioutil.ReadAll(res.Body)
+
+		defer log.Println("_CANCEL_ALL_", string(logBody))
 	}
 }
 
@@ -376,8 +383,11 @@ func bookById(id string) {
 		p(err)
 	}
 
-	log.Println("_RES_BODY_", res.Body)
 	defer res.Body.Close()
+
+	logBody, err := ioutil.ReadAll(res.Body)
+
+	defer log.Println("_BOOK_BY_ID_", string(logBody))
 }
 
 func cancel(id string) {
@@ -411,8 +421,12 @@ func cancel(id string) {
 	if err != nil {
 		p(err)
 	}
-	log.Println("_RES_BODY_", res.Body)
+
 	defer res.Body.Close()
+
+	logBody, err := ioutil.ReadAll(res.Body)
+
+	defer log.Println("_CANCEL_", string(logBody))
 }
 
 func setColumns(table *tview.Table) {
