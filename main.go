@@ -39,12 +39,11 @@ type TableColumnPair struct {
 }
 
 var indexColumn = TableColumnPair{0, "#"}
-var startColumn = TableColumnPair{1, "_____Start_____"}
-var endColumn = TableColumnPair{2, "_____End_____"}
-var trainerColumn = TableColumnPair{3, "_____Trainer_____"}
-var typeColumn = TableColumnPair{4, "_____Type_____"}
-var idColumn = TableColumnPair{5, "_____Id______"}
-var statusColumn = TableColumnPair{6, "_____Status_____"}
+var startColumn = TableColumnPair{2, "_____Start_____"}
+var endColumn = TableColumnPair{3, "_____End_____"}
+var trainerColumn = TableColumnPair{4, "_____Trainer_____"}
+var typeColumn = TableColumnPair{5, "_____Type_____"}
+var statusColumn = TableColumnPair{1, "_____Status_____"}
 
 var responses []Response
 var userAgent = HeaderPair{"User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0"}
@@ -393,7 +392,7 @@ func cancel(id string) {
 	defer res.Body.Close()
 }
 
-func setColumns(table *tview.Table) int {
+func setColumns(table *tview.Table) {
 	columns := strings.Split(indexColumn.value+
 		" "+
 		startColumn.value+
@@ -403,8 +402,6 @@ func setColumns(table *tview.Table) int {
 		trainerColumn.value+
 		" "+
 		typeColumn.value+
-		" "+
-		idColumn.value+
 		" "+
 		statusColumn.value, " ")
 
@@ -417,7 +414,6 @@ func setColumns(table *tview.Table) int {
 				SetTextColor(color).
 				SetAlign(tview.AlignCenter))
 	}
-	return len(columns)
 }
 
 func setRows(table *tview.Table) {
@@ -455,12 +451,6 @@ func setRows(table *tview.Table) {
 				SetTextColor(color).
 				SetAlign(tview.AlignCenter))
 
-		table.SetCell(
-			r, idColumn.index,
-			tview.NewTableCell(responses[r-1].Id).
-				SetTextColor(color).
-				SetAlign(tview.AlignCenter))
-
 		color = tcell.ColorWhite
 		if responses[r-1].Booked != Booked {
 			backgroundColor = tcell.ColorDarkRed
@@ -481,7 +471,7 @@ func setRows(table *tview.Table) {
 func runBookingTable(app *tview.Application) {
 	table := tview.NewTable().
 		SetBorders(true)
-	cols := setColumns(table)
+	setColumns(table)
 
 	setRows(table)
 
@@ -498,14 +488,14 @@ func runBookingTable(app *tview.Application) {
 	})
 
 	table.SetSelectedFunc(func(row int, column int) {
-		if table.GetCell(row, cols-1).Text == NotBooked {
+		if table.GetCell(row, statusColumn.index).Text == NotBooked {
 			app.Suspend(func() {
 				showModal(Book, row-1)
 			})
 			defer setRows(table)
 		}
 
-		if table.GetCell(row, cols-1).Text == Booked {
+		if table.GetCell(row, statusColumn.index).Text == Booked {
 			app.Suspend(func() {
 				showModal(Cancel, row-1)
 			})
@@ -523,9 +513,9 @@ func runBookingTable(app *tview.Application) {
 		SetTitle(fmt.Sprintf("MotiBro Table"))
 
 	flex := tview.NewFlex().
-		AddItem(tview.NewBox().SetBorder(false).SetTitle("Right (20 cols)"), 0, 2, false).
-		AddItem(frame, 0, 7, true).
-		AddItem(tview.NewBox().SetBorder(false).SetTitle("Right (20 cols)"), 0, 2, false)
+		AddItem(tview.NewBox().SetBorder(false), 0, 1, false).
+		AddItem(frame, 0, 9, true).
+		AddItem(tview.NewBox().SetBorder(false), 0, 1, false)
 
 	if err := app.SetRoot(flex, true).SetFocus(table).Run(); err != nil {
 		panic(err)
