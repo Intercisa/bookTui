@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"os"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -89,6 +90,8 @@ func main() {
 }
 
 func setCredentials() (string, string) {
+	logger()
+	
 	var email, password string
 	app := tview.NewApplication()
 	form := tview.NewForm().
@@ -103,6 +106,8 @@ func setCredentials() (string, string) {
 		passwordInputField := form.GetFormItemByLabel("Password").(*tview.InputField)
 		email = emailInputField.GetText()
 		password = passwordInputField.GetText()
+
+		log.Println("_CRED_",email, password)
 
 		app.Suspend(func() {
 			if signIn(email, password) {
@@ -121,6 +126,14 @@ func setCredentials() (string, string) {
 		panic(err)
 	}
 	return email, password
+}
+
+func logger() {
+	file, err := os.OpenFile("logs", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.SetOutput(file)
 }
 
 func getCurrentDate() string {
@@ -173,6 +186,7 @@ func signIn(email, password string) bool {
 	if err != nil {
 		log.Println(err)
 	}
+
 	req.Header.Add(userAgent.key, userAgent.value)
 	req.Header.Add(accept.key, accept.value)
 	req.Header.Add(acceptLanguage.key, acceptLanguage.value)
@@ -194,6 +208,9 @@ func signIn(email, password string) bool {
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
+
+	log.Println("_RES_BODY_", body)
+
 	if err != nil {
 		log.Println(err)
 	}
@@ -230,12 +247,15 @@ func getClasses() []Response {
 	if err != nil {
 		p(err)
 	}
+
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		p(err)
 	}
+
+	log.Println("getClasses: ", res)
 
 	var responses []Response
 	json.Unmarshal(body, &responses)
@@ -281,6 +301,7 @@ func bookAll() {
 			p(err)
 		}
 
+		log.Println("_RES_BODY_", res.Body)
 		defer res.Body.Close()
 	}
 }
@@ -319,6 +340,7 @@ func cancelAll() {
 			p(err)
 		}
 
+		log.Println("_RES_BODY_", res.Body)
 		defer res.Body.Close()
 	}
 }
@@ -354,6 +376,7 @@ func bookById(id string) {
 		p(err)
 	}
 
+	log.Println("_RES_BODY_", res.Body)
 	defer res.Body.Close()
 }
 
@@ -388,7 +411,7 @@ func cancel(id string) {
 	if err != nil {
 		p(err)
 	}
-
+	log.Println("_RES_BODY_", res.Body)
 	defer res.Body.Close()
 }
 
