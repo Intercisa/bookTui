@@ -38,13 +38,13 @@ type TableColumnPair struct {
 	value string
 }
 
-var indexColumn = TableColumnPair{0,"_____#_____"}
-var startColumn = TableColumnPair{1,"_____Start_____"}
-var endColumn = TableColumnPair{2,"_____End_____"}
-var trainerColumn = TableColumnPair{3,"_____Trainer_____"}
-var typeColumn = TableColumnPair{4,"_____Type_____"}
-var idColumn = TableColumnPair{5,"_____Id______"}
-var statusColumn = TableColumnPair{6,"_____Status_____"}
+var indexColumn = TableColumnPair{0, "#"}
+var startColumn = TableColumnPair{1, "_____Start_____"}
+var endColumn = TableColumnPair{2, "_____End_____"}
+var trainerColumn = TableColumnPair{3, "_____Trainer_____"}
+var typeColumn = TableColumnPair{4, "_____Type_____"}
+var idColumn = TableColumnPair{5, "_____Id______"}
+var statusColumn = TableColumnPair{6, "_____Status_____"}
 
 var responses []Response
 var userAgent = HeaderPair{"User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0"}
@@ -394,18 +394,18 @@ func cancel(id string) {
 }
 
 func setColumns(table *tview.Table) int {
-	columns := strings.Split(indexColumn.value + 
-		" " + 
-		startColumn.value + 
-		" " + 
-		endColumn.value + 
-		" " + 
-		trainerColumn.value + 
-		" " + 
-		typeColumn.value + 
-		" " + 
-		idColumn.value + 
-		" " + 
+	columns := strings.Split(indexColumn.value+
+		" "+
+		startColumn.value+
+		" "+
+		endColumn.value+
+		" "+
+		trainerColumn.value+
+		" "+
+		typeColumn.value+
+		" "+
+		idColumn.value+
+		" "+
 		statusColumn.value, " ")
 
 	cols := len(columns)
@@ -520,16 +520,12 @@ func runBookingTable(app *tview.Application) {
 		SetBorders(0, 0, 0, 0, 0, 0)
 
 	frame.SetBorder(true).
-	SetTitle(fmt.Sprintf("MotiBro Table"))
-
-
+		SetTitle(fmt.Sprintf("MotiBro Table"))
 
 	flex := tview.NewFlex().
-	AddItem(tview.NewBox().SetBorder(false).SetTitle("Right (20 cols)"), 0, 2, false).
-	AddItem(frame, 0, 7, true).
-	AddItem(tview.NewBox().SetBorder(false).SetTitle("Right (20 cols)"), 0, 2, false)
-
-
+		AddItem(tview.NewBox().SetBorder(false).SetTitle("Right (20 cols)"), 0, 2, false).
+		AddItem(frame, 0, 7, true).
+		AddItem(tview.NewBox().SetBorder(false).SetTitle("Right (20 cols)"), 0, 2, false)
 
 	if err := app.SetRoot(flex, true).SetFocus(table).Run(); err != nil {
 		panic(err)
